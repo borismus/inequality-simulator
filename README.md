@@ -2,26 +2,21 @@ Minimum viable simulation of inequality
 =======================================
 
 Households have:
-- Discretionary income
-- Investment ability (effective market return rate)
-- Spending habits
-- Lifespan
+- Discretionary income.
+- Investment ability (effective market return rate).
 
 The world has:
-- Estate tax rate
-- Wealth tax rate
-- Inflation rate
+- Estate taxes, minimum amount of wealth before tax kicks in.
 
 Rules:
-- Each year, households spend their discretionary income and invest what's left over.
-- Their net worth (including investments) is subject to the wealth tax rate.
+- Each year, households invest their discretionary income.
+- If high enough, their net worth (including investments) is subject to the
+  wealth tax rate.
 - It's also subject to the inflation rate (which effectively decreases their net
-  worth).
-- When a household reaches the end of its lifespan, it passes on its wealth to
-  the next generation, modulo estate taxes.
-- All taxes go to the government.
+  worth). This does nothing to the wealth distribution, just reduces the
+  actual values.
 
 Simplest visualization:
-- Time on y, going downward.
+- Time on y, going upward.
 - Wealth amount on x, increasing right-ward.
 - Scrollable, with latest data on top.
