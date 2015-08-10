@@ -7,7 +7,7 @@ var Util = require('./util.js');
  */
 function Simulation() {
   // Who to consider wealthy.
-  this.wealthTaxThreshold = 1000;
+  this.wealthTaxThreshold = 500;
   // How much taxes to subject the wealthy to.
   this.wealthTaxRate = 0.0001;
   // Whether or not taxes paid by the wealthy get redistributed to the poor
@@ -26,7 +26,7 @@ function Simulation() {
 
   // Just to keep the numbers a bit down, otherwise everybody becomes a
   // millionaire in like 100 iterations.
-  this.inflationRate = 0.03;
+  this.inflationRate = 0.02;
 
   this.households = [];
 }

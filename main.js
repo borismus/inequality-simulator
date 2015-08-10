@@ -96,7 +96,7 @@ function createGui() {
   // Make a DAT.gui for changing parameters of each household.
   var gui = new dat.GUI();
   gui.add(simulation, 'wealthTaxRate', 0, 0.1);
-  gui.add(simulation, 'wealthTaxThreshold', 0, 10000);
+  gui.add(simulation, 'wealthTaxThreshold', 0, 5000);
   gui.add(simulation, 'isSocialist');
 
   var hh = simulation.households;
