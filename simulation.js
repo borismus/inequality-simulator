@@ -6,29 +6,27 @@ var Util = require('./util.js');
  * rates, market returns. Also defines the distributions that drive households.
  */
 function Simulation() {
-  // Estate tax estimated.
-  this.estateTaxRate = 0.3;
-  this.wealthTaxRate = 0.00001;
-  // Inflation rate from http://goo.gl/vpZSW8.
-  this.inflationRate = 0.0322;
+  // Who to consider wealthy.
+  this.wealthTaxThreshold = 1000;
+  // How much taxes to subject the wealthy to.
+  this.wealthTaxRate = 0.0001;
+  // Whether or not taxes paid by the wealthy get redistributed to the poor
+  // directly.
+  this.isSocialist = false;
 
   // Parameters that drive household distributions.
   this.discretionaryIncomeDist = {
     mean: 50000,
     sd: 10000
   };
-  this.lifespanDist = {
-    mean: 30,
-    sd: 10
-  };
-  this.spendingPercentDist = {
-    mean: 0.5,
-    sd: 0.2
-  };
   this.investmentAbilityDist = {
     mean: 0.05,
     sd: 0.03
   };
+
+  // Just to keep the numbers a bit down, otherwise everybody becomes a
+  // millionaire in like 100 iterations.
+  this.inflationRate = 0.03;
 
   this.households = [];
 }
@@ -49,50 +47,22 @@ Simulation.prototype.getValue = function(valueName) {
   return Util.getRandomNormal(dist.mean, dist.sd);
 };
 
-Simulation.prototype.payTax = function(household, amount) {
-  // Do nothing about taxes for now.
-  return;
-  // Split wealth evenly between all other households that need money.
-  var hh = this.getOtherHouseholdsInDebt(household);
-  var amountPerHousehold = amount / hh.length;
+Simulation.prototype.payTax = function(donorHousehold, amount) {
+  // Split wealth evenly between all other households except itself.
+  var houses = this.households;
+  var amountPerHousehold = amount / (houses.length - 1);
 
-  // Model the fact that taxes aren't actually distributed directly to poor
-  // people through this efficiency notion.
-  amountPerHousehold *= this.taxEfficiency;
-  for (var i = 0; i < hh.length; i++) {
-    var h = hh[i];
-    // Never give a huge amount of aid, just enough to get out of poverty.
-    var maxAid = Math.abs(h.netWorth);
-    var aid = Math.min(maxAid, amountPerHousehold);
-    h.netWorth += aid;
+  for (var i = 0; i < houses.length; i++) {
+    var h = houses[i];
+    if (h != donorHousehold) {
+    }
+    h.netWorth += amountPerHousehold;
 
     this.fire('welfare', {
       household: h,
-      amount: aid
+      amount: amountPerHousehold
     });
   }
-};
-
-Simulation.prototype.getOtherHouseholdsInDebt = function(household) {
-  var out = [];
-  for (var i = 0; i < this.households.length; i++) {
-    var h = this.households[i];
-    if (h.netWorth <= 0 && h != household) {
-      out.push(h);
-    }
-  }
-  return out;
-};
-
-Simulation.prototype.replaceHousehold = function(parent, child) {
-  var removeIndex = 0;
-  for (var i = 0; i < this.households.length; i++) {
-    if (this.households[i] == parent) {
-      removeIndex = i;
-      break;
-    }
-  }
-  this.households[removeIndex] = child;
 };
 
 module.exports = Simulation;

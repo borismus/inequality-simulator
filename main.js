@@ -8,21 +8,15 @@ window.simulation = new Simulation();
 
 // Discretionary incomes from http://goo.gl/Wak8Mc.
 var poor = new Household({
-  discretionaryIncome: 9699,
-  lifespan: 50,
-  spendingPercent: 0.4,
+  discretionaryIncome: 20,
   investmentAbility: 0.03
 });
 var average = new Household({
-  discretionaryIncome: 21657,
-  lifespan: 50,
-  spendingPercent: 0.4,
+  discretionaryIncome: 20,
   investmentAbility: 0.03
 });
 var rich = new Household({
-  discretionaryIncome: 62110,
-  lifespan: 50,
-  spendingPercent: 0.4,
+  discretionaryIncome: 20,
   investmentAbility: 0.03
 });
 
@@ -36,13 +30,9 @@ rich.label = 'rich';
 var hh = simulation.households;
 for (var i = 0; i < hh.length; i++) {
   hh[i].on('earn', onEarn);
-  hh[i].on('spend', onSpend);
   hh[i].on('invest', onInvest);
-  hh[i].on('bequest', onBequest);
-  hh[i].on('inflate', onInflate);
 }
 simulation.on('tick', onTick);
-simulation.on('welfare', onWelfare);
 
 setInterval(function() {
   simulation.tick();
@@ -52,31 +42,12 @@ function onEarn(e) {
   //console.log('%s earned $%d', e.household.label, e.amount);
 }
 
-function onIncomeTax(e) {
-  //console.log('%s paid $%d in income tax', e.household.label, e.amount);
-}
-
-function onSpend(e) {
-  //console.log('%s spent $%d on living costs', e.household.label, e.amount);
-}
-
 function onInvest(e) {
   //console.log('%s got $%d from investment income', e.household.label, e.amount);
 }
 
-function onBequest(e) {
-  console.log('%s inherited $%d', e.household.label, e.household.netWorth);
-}
-
-function onInflate(e) {
-}
-
 function onTick(e) {
   draw();
-}
-
-function onWelfare(e) {
-  //console.log('%s got $%d of welfare from government.', e.household.label, e.amount);
 }
 
 function getPercentages(houses) {
@@ -124,17 +95,15 @@ function drawRow(houses) {
 function createGui() {
   // Make a DAT.gui for changing parameters of each household.
   var gui = new dat.GUI();
-  gui.add(simulation, 'estateTaxRate', 0, 0.5);
   gui.add(simulation, 'wealthTaxRate', 0, 0.1);
-  gui.add(simulation, 'inflationRate', 0, 0.1);
+  gui.add(simulation, 'wealthTaxThreshold', 0, 10000);
+  gui.add(simulation, 'isSocialist');
 
   var hh = simulation.households;
   for (var i = 0; i < hh.length; i++) {
     var h = hh[i];
     var folder = gui.addFolder(h.label);
-    folder.add(h, 'discretionaryIncome');
-    folder.add(h, 'lifespan', 0, 100).step(1);
-    folder.add(h, 'spendingPercent', 0, 1);
+    folder.add(h, 'discretionaryIncome', 0, 200);
     folder.add(h, 'investmentAbility', 0, 0.1);
   }
 }
