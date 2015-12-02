@@ -1,0 +1,24 @@
+{
+  "name": "viz",
+  "homepage": "https://github.com/borismus/simulations",
+  "authors": [
+    "Boris Smus <boris@smus.com>"
+  ],
+  "description": "",
+  "main": "",
+  "moduleType": [],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "three.js": "threejs#*",
+    "tween.js": "tweenjs#~16.3.1",
+    "stats.js": "*",
+    "webvr-boilerplate": "~0.2.2"
+  }
+}

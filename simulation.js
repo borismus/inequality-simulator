@@ -26,7 +26,7 @@ function Simulation() {
 
   // Just to keep the numbers a bit down, otherwise everybody becomes a
   // millionaire in like 100 iterations.
-  this.inflationRate = 0.02;
+  this.inflationRate = 0.03;
 
   this.households = [];
 }

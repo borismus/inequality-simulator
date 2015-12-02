@@ -2,7 +2,7 @@ var Simulation = require('./simulation.js');
 var Household = require('./household.js');
 
 var MAX_ROWS = 30;
-var TICK_FPS = 30;
+var TICK_FPS = 3;
 
 window.simulation = new Simulation();
 

@@ -13,6 +13,7 @@
     "tests"
   ],
   "dependencies": {
-    "mathjs": "~1.7.1"
+    "mathjs": "~1.7.1",
+    "polymer": "Polymer/polymer#^1.2.0"
   }
 }
