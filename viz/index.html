@@ -7,120 +7,88 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+    <script src="bower_components/webcomponentsjs/webcomponents-lite.min.js"></script>
+    <link rel="import" href="bower_components/iron-icons/iron-icons.html">
+    <link rel="import" href="bower_components/iron-flex-layout/iron-flex-layout.html">
+    <link rel="import" href="bower_components/paper-drawer-panel/paper-drawer-panel.html">
+    <link rel="import" href="bower_components/paper-item/paper-item.html">
+    <link rel="import" href="bower_components/paper-item/paper-item-body.html">
+    <link rel="import" href="bower_components/paper-item/paper-icon-item.html">
+    <link rel="import" href="bower_components/paper-styles/demo-pages.html">
+    <link rel="import" href="bower_components/paper-styles/typography.html">
+    <link rel="import" href="bower_components/paper-button/paper-button.html">
+
+    <link rel="import" href="components/ineq-item.html">
 	</head>
-	<body>
-		<script src="./bower_components/three.js/build/three.min.js"></script>
-		<script src="./bower_components/three.js/examples/js/controls/VRControls.js"></script>
-		<script src="./bower_components/three.js/examples/js/effects/VREffect.js"></script>
-		<script src="./bower_components/tween.js/src/Tween.js"></script>
-    <script src="./bower_components/stats.js/build/stats.min.js"></script>
+	<body unresolved>
+    <style is="custom-style">
 
-    <script src="renderer.js"></script>
-    <script src="actor.js"></script>
-    <script src="simulation.js"></script>
+.paper-font-subhead {
+  margin: 16px;
+  margin-bottom: 0;
+  @apply(--paper-font-subhead);
+  clear: both;
+}
 
-    <style>
+.list {
+  padding: 12px 0;
+  background-color: white;
+  display: inline-block;
+  width: 240px;
+  margin: 12px;
+  @apply(--shadow-elevation-2dp);
+}
+
+paper-button {
+  float: right;
+}
+
 body, html {
   padding: 0;
   margin: 0;
 }
+
+.flex {
+  @apply(--layout-flex);
+}
+
     </style>
 
-		<script>
-window.addEventListener('load', init);
+		<script src="./bower_components/threejs/build/three.min.js"></script>
+		<script src="./bower_components/threejs/examples/js/controls/VRControls.js"></script>
+		<script src="./bower_components/threejs/examples/js/effects/VREffect.js"></script>
+		<script src="./bower_components/tween.js/src/Tween.js"></script>
+    <script src="./bower_components/stats.js/build/stats.min.js"></script>
 
-var stats = new Stats();
-stats.setMode(0); // 0: fps, 1: ms
-
-// align bottom-left
-stats.domElement.style.position = 'absolute';
-stats.domElement.style.left = '0px';
-stats.domElement.style.bottom = '0px';
-
-document.body.appendChild(stats.domElement);
-
-var renderer = new Renderer();
-
-function init() {
-}
-
-
-function loop(timestamp) {
-  stats.begin();
-  renderer.render(timestamp);
-  stats.end();
-  requestAnimationFrame(loop);
-}
+    <paper-drawer-panel right-drawer>
+      <div main>
+        <paper-icon-button icon="menu" paper-drawer-toggle></paper-icon-button>
+      </div>
+      <div drawer>
+        <div class="paper-font-subhead">Rules</div>
+        
+        <div class="list short" role="listbox" id="rule-list">
+        </div>
+        <!--<paper-button raised>Add rule</paper-button>-->
 
 
-loop();
+        <div class="paper-font-subhead">Properties</div>
+        <div class="list short" role="listbox" id="prop-list">
+        </div>
+        <!--<paper-button raised>Add property</paper-button>-->
 
-var lastTotals = [0, 0];
+      </div>
+    </paper-drawer-panel>
 
-window.addEventListener('keydown', function(e) {
-  console.log(e.keyCode);
-  
-  if (e.keyCode == 65) { // a
-    renderer.add(0);
-  } else if (e.keyCode == 90) { // z
-    renderer.remove(0);
-  } else if (e.keyCode == 83) { // s
-    renderer.add(1);
-  } else if (e.keyCode == 88) { // w
-    renderer.remove(1);
-  } else if (e.keyCode == 32) { // Space
-    simulation.step();
-    for (var i = 0; i < simulation.actors.length; i++) {
-      var total = simulation.actors[i].total;
-      var delta = total - lastTotals[i];
-      console.log('Delta %f for actor %d', delta, i);
-      updateDelta(delta, i);
-      lastTotals[i] = total;
-    }
-  }
-});
 
-function updateDelta(delta, ind) {
-  if (delta > 0) {
-    func = renderer.add;
-  } else {
-    func = renderer.remove;
-  }
-
-  for (var i = 0; i < Math.abs(parseInt(delta)); i++) {
-    func.bind(renderer)(ind);
-  }
-}
-
-var properties = ['incomeMultiplier', 'spendingHabits', 'label'];
-var rules = [
-  {label: 'Salary', action: {value: 2, property: 'incomeMultiplier'}},
-  {label: 'Investment', action: {value: 0.07, property: 'total'}},
-  {label: 'Spending', action: {value: -1, property: 'spendingHabits'}},
-  {label: 'Inflation', action: {value: -0.02, property: 'total'}},
-  {
-    label: 'Estate tax',
-    action: {value: -0.01, property: 'total'},
-    conditions: [
-      {value: 100, property: 'total', operator: '>'},
-      {value: 30, property: 'year', operator: '>'}
-    ]
-  }
-];
-var simulation = new Simulation(properties, rules);
-
-simulation.addActor({
-  label: 'poor',
-  incomeMultiplier: 1,
-  spendingHabits: 1,
-});
-simulation.addActor({
-  label: 'rich',
-  incomeMultiplier: 2,
-  spendingHabits: 1,
-});
-
-		</script>
+    <script src="renderer.js"></script>
+    <script src="rule.js"></script>
+    <script src="actor.js"></script>
+    <script src="simulation.js"></script>
+		<script src="main.js"></script>
+    <script src="util.js"></script>
+    <script src="world.js"></script>
 	</body>
 </html>
 

@@ -1,13 +1,12 @@
-function Renderer() {
-  var container = document.querySelector('body');
-  var aspect = window.innerWidth / window.innerHeight;
-  var camera = new THREE.PerspectiveCamera(75, aspect, 0.1, 200);
+function Renderer(opt_params) {
+  var params = opt_params || {};
+  this.container = document.querySelector('div[main]');
+  var camera = new THREE.PerspectiveCamera(75, 4.0/3.0, 0.1, 2000);
 
   var renderer = new THREE.WebGLRenderer({antialias: true});
   renderer.setClearColor(0x000000, 0);
-  renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setPixelRatio(window.devicePixelRatio);
-  container.appendChild(renderer.domElement);
+  this.container.appendChild(renderer.domElement);
 
   //var controls = new THREE.VRControls(camera);
   //var effect = new THREE.VREffect(renderer);
@@ -18,14 +17,13 @@ function Renderer() {
   //this.effect = effect;
   //this.controls = controls;
 
-  this.sourcePosition = new THREE.Vector3(0, 5, -5);
-  this.sinkPosition = new THREE.Vector3(0, -5, -5);
-
   this.tweens = {};
-  this.stackCount = 2;
+  this.stackCount = params.stackCount || 2;
 
   this.scene = this.createScene_();
   this.scene.add(this.camera);
+
+  this.resize();
 }
 
 Renderer.prototype.render = function(timestamp) {
@@ -40,10 +38,9 @@ Renderer.prototype.add = function(stackId) {
   
   var cube = this.createItem_();
   items.add(cube);
+  cube.position.copy(this.getSourcePosition_(stackId));
 
-  this.moveObject_(cube.id, this.getSourcePosition_(stackId), this.getPosition_(n, stackId), 1000);
-
-  this.updateCamera_();
+  this.moveObject_(cube, this.getPosition_(n, stackId), 1000);
 };
 
 Renderer.prototype.remove = function(stackId) {
@@ -59,7 +56,7 @@ Renderer.prototype.remove = function(stackId) {
   if (items.length > 1) {
     for (var i = 1; i < items.length; i++) {
       var curr = items[i];
-      this.moveObject_(curr.id, curr.position, this.getPosition_(i - 1, stackId), 500);
+      this.moveObject_(curr, this.getPosition_(i - 1, stackId), 500);
     }
   }
 
@@ -67,14 +64,35 @@ Renderer.prototype.remove = function(stackId) {
   var item = items[0];
   removing.add(item);
   group.remove(item);
-  this.moveObject_(item.id, item.position, this.getSinkPosition_(stackId), 500, function() {
+  this.moveObject_(item, this.getSinkPosition_(stackId), 500, function() {
     removing.remove(item);
-    //console.log('Removed item %d', item.id);
   });
-
-  this.updateCamera_();
 };
 
+
+Renderer.prototype.addShadow = function(stackId) {
+  var items = this.scene.getObjectByName(stackId);
+  var removing = this.scene.getObjectByName('removing');
+  var n = items.children.length;
+  
+  var cube = this.createShadow_();
+  removing.add(cube);
+  cube.position.copy(this.getSourcePosition_(stackId));
+
+  this.moveObject_(cube, this.getPosition_(n, stackId), 1000, function() {
+    removing.remove(cube);
+  });
+};
+
+Renderer.prototype.removeShadow = function(stackId) {
+  var removing = this.scene.getObjectByName('removing');
+  var cube = this.createShadow_();
+  cube.position.copy(this.getPosition_(0, stackId));
+  removing.add(cube);
+  this.moveObject_(cube, this.getSinkPosition_(stackId), 500, function() {
+    removing.remove(cube);
+  });
+};
 
 /** 
  *
@@ -119,45 +137,67 @@ Renderer.prototype.createItem_ = function() {
   return cube;
 };
 
+Renderer.prototype.createShadow_ = function() {
+  var geometry = new THREE.BoxGeometry(1, 0.1, 1);
+  var material = new THREE.MeshBasicMaterial({
+    color: 0xffffff,
+    opacity: 0.5,
+    transparent: true,
+  });
+  var cube = new THREE.Mesh(geometry, material);
+  return cube;
+};
+
 Renderer.prototype.getPosition_ = function(n, stackId) {
   var pos = new THREE.Vector3();
-  pos.x = stackId == 0 ? -1 : 1;
-  pos.y = 0.2 * n - 3;
+  pos.x = stackId * 1.3;
+  pos.y = 0.2 * n;
   pos.z = -5;
   return pos;
 };
 
+/** 
+ * Sink should be at the bottom of all stacks, centered.
+ */
 Renderer.prototype.getSinkPosition_ = function(stackId) {
-  return this.sinkPosition;
+  var bbox = this.getBoundingBox_();
+  var pos = bbox.center();
+  pos.y = bbox.min.y;
+  pos.y -= 1;
+  return pos;
 };
 
+/**
+ * Source should be on top of all of the stacks, centered.
+ */
 Renderer.prototype.getSourcePosition_ = function(stackId) {
-  return this.sourcePosition;
+  var bbox = this.getBoundingBox_();
+  var pos = bbox.center();
+  pos.y = bbox.max.y;
+  pos.y += 2;
+  return pos;
 };
 
-Renderer.prototype.moveObject_ = function(id, start, end, duration, opt_callback) {
+Renderer.prototype.moveObject_ = function(obj, end, duration, opt_callback) {
+  var id = obj.id;
   // Check if a tween already exists for this object.
   var tweens = this.tweens;
   if (tweens[id]) {
     //console.log('found tween %d already', id);
     tweens[id].stop();
-    delete tweens[id];
   }
   //console.log('starting tween of %d from %f to %f', id, start.y, end.y);
-  var pos = new THREE.Vector3();
-  pos.copy(start);
 
   var scene = this.scene;
-  var tween = new TWEEN.Tween(pos)
+  var tween = new TWEEN.Tween(obj.position)
       .to(end, duration)
-      .onUpdate(function() {
-        //console.log('Updating position of %d to %f', id, this.y);
-        var obj = scene.getObjectById(id);
-        if (obj) {
-          obj.position.copy(this);
+      .onComplete(function() {
+        delete tweens[id]
+        if (opt_callback) {
+          opt_callback();
         }
       })
-      .onComplete(function() {
+      .onStop(function() {
         delete tweens[id]
         if (opt_callback) {
           opt_callback();
@@ -188,7 +228,8 @@ Renderer.prototype.getBoundingBox_ = function() {
   return box;
 };
 
-Renderer.prototype.updateCamera_ = function() {
+Renderer.prototype.updateCamera = function() {
+  console.log('updateCamera');
   var box = this.getBoundingBox_();
   var center = box.center();
   var halfAngle = THREE.Math.degToRad(this.camera.fov/2);
@@ -196,9 +237,34 @@ Renderer.prototype.updateCamera_ = function() {
   var maxSize = Math.max(size.y, size.z);
   var z = maxSize * Math.tan(halfAngle);
 
-  // TODO: Tween these movements, and only correct camera if things can't be
-  // seen (add hysterisis).
-  this.camera.position.copy(center);
-  this.camera.position.z = z;
-  this.camera.lookAt(center);
+  // TODO: Tween these movements, and only correct camera if new parameters have
+  // changed a lot.
+  if (center.distanceTo(this.camera.position) > 3) {
+    var camera = this.camera;
+    // Where the camera is now.
+    var pos = new THREE.Vector3();
+    pos.copy(camera.position);
+
+    var target = new THREE.Vector3();
+    target.copy(center);
+    target.z = z;
+
+    var tween = new TWEEN.Tween(pos)
+        .to(target, 500)
+        .onUpdate(function() {
+          camera.position.copy(this);
+        })
+        .start();
+  }
+};
+
+Renderer.prototype.resize = function() {
+  // Set the canvas size.
+  //var width = window.innerWidth;
+  //var height = window.innerHeight;
+  var width = this.container.offsetWidth;
+  var height = this.container.offsetHeight;
+  this.renderer.setSize(width, height);
+  var aspect = width / height;
+  this.camera.aspect = aspect;
 };

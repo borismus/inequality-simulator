@@ -1,6 +1,6 @@
-function Actor(properties) {
-  for (var p in properties) {
-    this[p] = properties[p];
+function Actor(params) {
+  for (var p in params) {
+    this[p] = params[p];
   }
-  this.total = 0;
+  this.total = params.total || 0;
 }
