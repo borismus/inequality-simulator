@@ -1,8 +1,12 @@
+var title = 'Entrepreneurship combined with investment compounds wealth inequality';
+
 var rules = [
   {label: 'Salary', action: 'this.total += 2 * this.incomeMultiplier'},
   {label: 'Investment', action: 'this.total += this.investmentAbility * this.total'},
-  {label: 'Enterprise', action: 'this.total += 1.5 * this.total',
-    condition: ['Math.random() < 0.05', 'this.isEntrepreneur == true']},
+  {label: 'Enterprise success', action: 'this.total += 0.5 * this.total',
+    condition: ['Math.random() < 0.01', 'this.isEntrepreneur == true']},
+  {label: 'Enterprise fail', action: 'this.total -= 0.05 * this.total',
+    condition: ['Math.random() < 0.1', 'this.isEntrepreneur == true']},
   {label: 'Spending', action: 'this.total -= 1 * this.spendingHabits'},
 ];
 
@@ -10,7 +14,7 @@ var simulation = new Simulation(rules);
 
 var incomes = [1, 2];
 var incomeLabels = ['low-salary', 'high-salary'];
-var investmentAbilities = [0, 0.1];
+var investmentAbilities = [0, 0.05];
 var investmentLabels = ['not-investor', 'investor'];
 var entrepreneurness = [true, false];
 var entrepreneurLabels = ['entrepreneur', 'not-entrepreneur'];

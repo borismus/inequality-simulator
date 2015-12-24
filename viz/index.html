@@ -31,6 +31,26 @@
   clear: both;
 }
 
+.paper-font-body {
+  margin: 4px;
+  margin-left: 20px;
+  @apply(--paper-font-body);
+}
+
+.paper-font-headline {
+  position: absolute;
+  margin: 16px;
+  color: white;
+  @apply(--paper-font-headline);
+}
+
+.controls {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  color: white;
+}
+
 .list {
   padding: 12px 0;
   background-color: white;
@@ -53,6 +73,10 @@ body, html {
   @apply(--layout-flex);
 }
 
+[drawer] {
+  overflow-y: auto;
+}
+
     </style>
 
 		<script src="./bower_components/threejs/build/three.min.js"></script>
@@ -64,8 +88,23 @@ body, html {
     <paper-drawer-panel right-drawer>
       <div main>
         <paper-icon-button icon="menu" paper-drawer-toggle></paper-icon-button>
+        <div id="title" class="paper-font-headline">Simulation title</div>
+
+        <div class="controls">
+          <paper-button raised id="five">25 Steps</paper-button>
+          <paper-button raised id="one">One Step</paper-button>
+          <paper-button raised id="reset">Reset</paper-button>
+        </div>
       </div>
       <div drawer>
+        <div class="paper-font-subhead">Simulation</div>
+        <div class="paper-font-body">
+          Iteration: <span id="iteration">0</span>
+        </div>
+        <div class="paper-font-body">
+          Gini coefficient: <span id="gini">unknown</span>
+        </div>
+
         <div class="paper-font-subhead">Rules</div>
         
         <div class="list short" role="listbox" id="rule-list">
@@ -82,13 +121,12 @@ body, html {
     </paper-drawer-panel>
 
 
+    <script src="util.js"></script>
     <script src="renderer.js"></script>
     <script src="rule.js"></script>
     <script src="actor.js"></script>
     <script src="simulation.js"></script>
 		<script src="main.js"></script>
-    <script src="util.js"></script>
-    <script src="world.js"></script>
 	</body>
 </html>
 

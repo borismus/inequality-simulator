@@ -3,6 +3,11 @@ window.addEventListener('keydown', onKey);
 window.addEventListener('resize', onResize);
 window.addEventListener('WebComponentsReady', onResize);
 
+// Hook up buttons
+document.querySelector('paper-button#five').addEventListener('click', doFiveSteps);
+document.querySelector('paper-button#one').addEventListener('click', doOneStep);
+document.querySelector('paper-button#reset').addEventListener('click', doReset);
+
 var stats = new Stats();
 stats.setMode(0); // 0: fps, 1: ms
 
@@ -11,12 +16,18 @@ stats.domElement.style.position = 'absolute';
 stats.domElement.style.left = '0px';
 stats.domElement.style.bottom = '0px';
 
-document.body.appendChild(stats.domElement);
+if (Util.getQueryParameter('debug')) {
+  document.body.appendChild(stats.domElement);
+}
 
 var renderer = new Renderer({stackCount: 10});
 
 function init() {
-  createGui();
+  Util.loadScript(Util.getQueryParameter('model'), function() {
+    createGui();
+    updateGuiStep();
+    document.querySelector('#title').innerHTML = window.title;
+  });
 }
 
 
@@ -39,15 +50,12 @@ function onKey(e) {
     renderer.remove(0);
   } else if (e.keyCode == 83) { // s
     renderer.add(1);
-  } else if (e.keyCode == 88) { // w
+  } else if (e.keyCode == 88) { // x
     renderer.remove(1);
   } else if (e.keyCode == 32) { // Space
     simulation.step();
     updateVisualization();
     updateGuiStep();
-
-    var gini = Util.calculateGini(simulation);
-    console.log('Gini coefficient: %f', gini);
   }
 };
 
@@ -82,12 +90,14 @@ function updateVisualization() {
 
     // If at least one block was added, show the animation.
     if (blockCount >= 1 && sign == 1) {
-      repeatFunction(function() { renderer.add(i); }, blockCount)
+      //repeatFunction(function() { renderer.add(i); }, blockCount)
+      renderer.add(i, blockCount);
     }
 
     // If at least one block was removed, show the animation.
     if (blockCount >= 1 && sign == -1) {
-      repeatFunction(function() { renderer.remove(i); }, blockCount);
+      //repeatFunction(function() { renderer.remove(i); }, blockCount);
+      renderer.remove(i, blockCount);
     }
 
     // If no blocks were added, but there was a remainder.
@@ -142,16 +152,56 @@ function createGui() {
 }
 
 function updateGuiStep() {
-  // Select the right item in the GUI.
   var ruleList = document.querySelector('#rule-list');
   var rules = ruleList.querySelectorAll('ineq-item');
 
+  // Select the right item in the GUI.
   for (var i = 0; i < rules.length; i++) {
     var rule = rules[i];
-    if (i == simulation.previousRule) {
+    if (i == simulation.currentRule) {
       rule.setAttribute('selected', true);
     } else {
       rule.removeAttribute('selected');
     }
+
+    if (simulation.previousRule == 0) {
+      rule.removeAttribute('executed');
+    }
+  }
+
+  if (simulation.previousRule !== undefined && simulation.didPreviousRuleExecute) {
+    // Indicate that the previous rule just ran.
+    rules[simulation.previousRule].setAttribute('executed', true);
+  }
+
+  // Update the UI.
+  var gini = Util.calculateGini(simulation);
+  document.querySelector('#gini').innerHTML = gini ? gini.toFixed(2) : 'unknown';
+  document.querySelector('#iteration').innerHTML = simulation.currentStep;
+}
+
+function doFiveSteps() {
+  for (var i = 0; i < 50; i++) {
+    doOneStepHelper();
+  }
+  updateVisualization();
+  updateGuiStep();
+}
+
+function doOneStep() {
+  doOneStepHelper();
+  updateVisualization();
+  updateGuiStep();
+}
+
+function doReset() {
+  window.location.reload();
+}
+
+function doOneStepHelper() {
+  // Keep stepping until we get to the next one.
+  var startStep = simulation.currentStep;
+  while (startStep == simulation.currentStep) {
+    simulation.step();
   }
 }

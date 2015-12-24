@@ -1,1 +1,1 @@
-6-estate-tax.js
+7-wealth-tax.js

@@ -1,3 +1,5 @@
+var DEFAULT_TWEEN_TIME = 200;
+
 function Renderer(opt_params) {
   var params = opt_params || {};
   this.container = document.querySelector('div[main]');
@@ -32,41 +34,56 @@ Renderer.prototype.render = function(timestamp) {
   this.update_(timestamp);
 };
 
-Renderer.prototype.add = function(stackId) {
+Renderer.prototype.add = function(stackId, opt_amount) {
+  var amount = opt_amount || 1;
   var items = this.scene.getObjectByName(stackId);
   var n = items.children.length;
   
-  var cube = this.createItem_();
-  items.add(cube);
-  cube.position.copy(this.getSourcePosition_(stackId));
+  for (var i = 0; i < amount; i++) {
+    var cube = this.createItem_();
+    items.add(cube);
+    cube.position.copy(this.getSourcePosition_(stackId));
 
-  this.moveObject_(cube, this.getPosition_(n, stackId), 1000);
+    this.moveObject_(cube, this.getPosition_(n + i, stackId), DEFAULT_TWEEN_TIME);
+  }
 };
 
-Renderer.prototype.remove = function(stackId) {
+Renderer.prototype.remove = function(stackId, opt_amount) {
+  var amount = opt_amount || 1;
   var group = this.scene.getObjectByName(stackId);
   var removing = this.scene.getObjectByName('removing');
-  var items = group.children;
+  var items = group.children.slice();
   if (items.length == 0) {
-    console.log('No more items to remove');
+  }
+
+  if (items.length < amount) {
+    // Fail: not enough items to remove requested amount.
+    console.log('Cannot remove %d items. Only %d remain.', amount, items.length);
     return;
   }
 
-  // Move all of the remaining items down accordingly.
-  if (items.length > 1) {
-    for (var i = 1; i < items.length; i++) {
+  // Items [0...amount] are being removed, and items [amount+1...total] are
+  // shifting downward.
+  //
+  // Move all of the remaining items down accordingly (if any more are left).
+  if (items.length >= amount) {
+    for (var i = amount; i < items.length; i++) {
       var curr = items[i];
-      this.moveObject_(curr, this.getPosition_(i - 1, stackId), 500);
+      this.moveObject_(curr, this.getPosition_(i - amount, stackId), DEFAULT_TWEEN_TIME);
     }
   }
 
-  // Move the removed item to the sink.
-  var item = items[0];
-  removing.add(item);
-  group.remove(item);
-  this.moveObject_(item, this.getSinkPosition_(stackId), 500, function() {
-    removing.remove(item);
-  });
+  // Move the removed items to the sink.
+  for (var i = 0; i < amount; i++) {
+    var item = items[i];
+    removing.add(item);
+    group.remove(item);
+    console.log('Preparing to remove item %d', item.id);
+    this.moveObject_(item, this.getSinkPosition_(stackId), DEFAULT_TWEEN_TIME, function(item) {
+      console.log('Removed item %d', item.id);
+      removing.remove(item);
+    });
+  }
 };
 
 
@@ -79,7 +96,7 @@ Renderer.prototype.addShadow = function(stackId) {
   removing.add(cube);
   cube.position.copy(this.getSourcePosition_(stackId));
 
-  this.moveObject_(cube, this.getPosition_(n, stackId), 1000, function() {
+  this.moveObject_(cube, this.getPosition_(n, stackId), DEFAULT_TWEEN_TIME, function() {
     removing.remove(cube);
   });
 };
@@ -89,7 +106,7 @@ Renderer.prototype.removeShadow = function(stackId) {
   var cube = this.createShadow_();
   cube.position.copy(this.getPosition_(0, stackId));
   removing.add(cube);
-  this.moveObject_(cube, this.getSinkPosition_(stackId), 500, function() {
+  this.moveObject_(cube, this.getSinkPosition_(stackId), DEFAULT_TWEEN_TIME, function() {
     removing.remove(cube);
   });
 };
@@ -183,10 +200,10 @@ Renderer.prototype.moveObject_ = function(obj, end, duration, opt_callback) {
   // Check if a tween already exists for this object.
   var tweens = this.tweens;
   if (tweens[id]) {
-    //console.log('found tween %d already', id);
+    console.log('found tween %d already', id);
     tweens[id].stop();
   }
-  //console.log('starting tween of %d from %f to %f', id, start.y, end.y);
+  //console.log('starting tween of %d from %f to %f', id, obj.position.y, end.y);
 
   var scene = this.scene;
   var tween = new TWEEN.Tween(obj.position)
@@ -194,13 +211,13 @@ Renderer.prototype.moveObject_ = function(obj, end, duration, opt_callback) {
       .onComplete(function() {
         delete tweens[id]
         if (opt_callback) {
-          opt_callback();
+          opt_callback(obj);
         }
       })
       .onStop(function() {
         delete tweens[id]
         if (opt_callback) {
-          opt_callback();
+          opt_callback(obj);
         }
       })
       .start();

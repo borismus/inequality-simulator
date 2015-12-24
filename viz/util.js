@@ -39,3 +39,19 @@ Util.appendArrays = function(a1, a2) {
   }
   return Util.uniquifyArray(out);
 };
+
+// From http://goo.gl/4WX3tg
+Util.getQueryParameter = function(name) {
+  name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+  var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+      results = regex.exec(location.search);
+  return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+};
+
+Util.loadScript = function(src, callback) {
+  // Simply loads an additional JS file at the given src.
+  var script = document.createElement('script');
+  script.src = src;
+  document.body.appendChild(script);
+  script.addEventListener('load', callback);
+}

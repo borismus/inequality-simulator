@@ -32,8 +32,14 @@
   </style>
 
   <template>
-    <paper-icon-item selected$="{{selected}}">
-      <div class$="avatar {{color}}" item-icon></div>
+    <paper-icon-item selected$="{{selected}}" executed$="{{executed}}">
+      <template is="dom-if" if="{{executed}}">
+        <iron-icon class$="avatar {{color}}" icon="icons:check" item-icon></iron-icon>
+      </template>
+      <template is="dom-if" if="{{!executed}}">
+        <div class$="avatar {{color}}" item-icon></div>
+      </template>
+
       <template is="dom-if" if="{{subtitle}}">
         <paper-item-body two-line>
           <div>{{title}}</div>
@@ -56,7 +62,8 @@
       is: "ineq-item",
       properties: {
         subtitle: String,
-        noSubtitle: Boolean
+        noSubtitle: Boolean,
+        executed: {type: Boolean, value: false}
       }
     });
   </script>

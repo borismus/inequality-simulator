@@ -1,3 +1,4 @@
+var title = 'Differences in investing abilities leads to wealth inequality'
 var rules = [
   {label: 'Salary', action: 'this.total += 2 * this.incomeMultiplier'},
   {label: 'Investment', action: 'this.total += this.investmentAbility * this.total'},
@@ -15,5 +16,5 @@ simulation.addActor({
   label: 'investor',
   incomeMultiplier: 1,
   spendingHabits: 1,
-  investmentAbility: 0.1
+  investmentAbility: 0.05
 });

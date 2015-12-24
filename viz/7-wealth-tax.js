@@ -1,4 +1,5 @@
-var title = 'Adding an estate tax greatly reduces wealth inequality';
+var title = 'Adding an additional wealth tax helps even more';
+
 var rules = [
   {label: 'Salary', action: 'this.total += 2 * this.incomeMultiplier'},
   {label: 'Investment', action: 'this.total += this.investmentAbility * this.total'},
@@ -9,6 +10,8 @@ var rules = [
   {label: 'Spending', action: 'this.total -= 1 * this.spendingHabits'},
   {label: 'Estate tax', action: 'this.total -= 0.4 * this.total',
       condition: ['this.age % 10 == 0', 'this.total > 50']},
+  {label: 'Wealth tax', action: 'this.total -= 0.01 * this.total',
+      condition: 'this.total > 50'}
 ];
 
 var simulation = new Simulation(rules);

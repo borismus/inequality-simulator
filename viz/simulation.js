@@ -18,6 +18,8 @@ function Simulation(rules, opt_properties) {
   this.previousStep = -1;
   this.currentStep = 0;
   this.currentRule = 0;
+
+  this.didPreviousRuleExecute = false;
 }
 
 Simulation.prototype.addActor = function(properties) {
@@ -36,12 +38,11 @@ Simulation.prototype.step = function() {
 
   // Go to the next rule.
   this.goToNextRule_();
-
-  // Evaluate all subsequent hidden rules if there are any.
-  this.executeFutureHiddenRules_();
 };
 
 Simulation.prototype.executeRule_ = function(rule) {
+  this.didPreviousRuleExecute = false;
+
   for (var i = 0; i < this.actors.length; i++) {
     var actor = this.actors[i];
     
@@ -51,6 +52,7 @@ Simulation.prototype.executeRule_ = function(rule) {
 
     if (shouldExecute) {
       rule.action.evaluate(actor);
+      this.didPreviousRuleExecute = true;
     }
   }
 };
@@ -65,13 +67,6 @@ Simulation.prototype.evalConds_ = function(conds, actor) {
   return true;
 };
 
-Simulation.prototype.executeFutureHiddenRules_ = function() {
-  var rule = this.rules[this.currentRule];
-  if (rule.hidden) {
-    this.step();
-  }
-};
-
 Simulation.prototype.goToNextRule_ = function() {
   this.currentRule += 1;
 
@@ -79,7 +74,15 @@ Simulation.prototype.goToNextRule_ = function() {
   if (this.currentRule >= this.rules.length) {
     this.currentRule = 0;
     this.currentStep += 1;
+
+    this.updateActorAge_();
   }
+};
+
+Simulation.prototype.updateActorAge_ = function() {
+  for (var i = 0; i < this.actors.length; i++) {
+    this.actors[i].age += 1;
+  };
 };
 
 Simulation.prototype.validateActorProperties_ = function(properties) {
