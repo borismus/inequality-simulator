@@ -1,4 +1,4 @@
-var title = 'Adding an additional wealth tax helps even more';
+var title = 'Wealth and estate taxes can keep wealth inequality in control';
 
 var rules = [
   {label: 'Salary', action: 'this.total += 2 * this.incomeMultiplier'},

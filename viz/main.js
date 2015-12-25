@@ -20,7 +20,7 @@ if (Util.getQueryParameter('debug')) {
   document.body.appendChild(stats.domElement);
 }
 
-var renderer = new Renderer({stackCount: 10});
+var renderer = new Renderer({stackCount: 10, isLandscape: false});
 
 function init() {
   Util.loadScript(Util.getQueryParameter('model'), function() {
@@ -181,7 +181,7 @@ function updateGuiStep() {
 }
 
 function doFiveSteps() {
-  for (var i = 0; i < 50; i++) {
+  for (var i = 0; i < 25; i++) {
     doOneStepHelper();
   }
   updateVisualization();

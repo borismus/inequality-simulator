@@ -2,6 +2,7 @@ var DEFAULT_TWEEN_TIME = 200;
 
 function Renderer(opt_params) {
   var params = opt_params || {};
+
   this.container = document.querySelector('div[main]');
   var camera = new THREE.PerspectiveCamera(75, 4.0/3.0, 0.1, 2000);
 
@@ -21,6 +22,7 @@ function Renderer(opt_params) {
 
   this.tweens = {};
   this.stackCount = params.stackCount || 2;
+  this.isLandscape = !!params.isLandscape;
 
   this.scene = this.createScene_();
   this.scene.add(this.camera);
@@ -166,9 +168,47 @@ Renderer.prototype.createShadow_ = function() {
 };
 
 Renderer.prototype.getPosition_ = function(n, stackId) {
+  if (this.isLandscape) {
+    return this.getPositionLandscape_(n, stackId);
+  }
   var pos = new THREE.Vector3();
   pos.x = stackId * 1.3;
   pos.y = 0.2 * n;
+  pos.z = -5;
+  return pos;
+};
+
+/**
+ * Gets the position of the nth block in the specified stack. This function
+ * returns the landscape-orientation position, so that each actors' stack is
+ * actually multiple stacks. For example, the following layout:
+ *
+ * 7 8
+ * 4 5 6   4
+ * 1 2 3   1 2 3   1 2
+ * S1      S2      S3
+ *  
+ */
+Renderer.prototype.getPositionLandscape_ = function(n, stackId) {
+  var colsPerStack = 3;
+  var distanceBetweenCols = 0.1;
+  var distanceBetweenStacks = 0.5;
+  var colWidth = 1;
+  var itemHeight = 0.1;
+  var distanceBetweenItems = 0.1;
+
+  var stackWidth = colsPerStack * colWidth +
+      (colsPerStack - 1) * distanceBetweenCols;
+  var stackX = stackId * stackWidth + (stackId - 1) * distanceBetweenStacks;
+
+  var colNum = n % colsPerStack;
+  var rowNum = parseInt(n / colsPerStack);
+  var offsetX = colNum * colWidth + (colNum - 1) * distanceBetweenCols;
+  var offsetY = rowNum * (itemHeight + distanceBetweenItems);
+
+  var pos = new THREE.Vector3();
+  pos.x = stackX + offsetX;
+  pos.y = offsetY;
   pos.z = -5;
   return pos;
 };
