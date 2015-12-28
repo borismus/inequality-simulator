@@ -1,11 +1,13 @@
+var DEFAULT_MODEL = '1-world-income-ineq-doesnt-lead-to-wealth-ineq.js';
 window.addEventListener('load', init);
 window.addEventListener('keydown', onKey);
 window.addEventListener('resize', onResize);
 window.addEventListener('WebComponentsReady', onResize);
 
 // Hook up buttons
-document.querySelector('paper-button#five').addEventListener('click', doFiveSteps);
-document.querySelector('paper-button#one').addEventListener('click', doOneStep);
+document.querySelector('paper-button#five').addEventListener('click', do25Years);
+document.querySelector('paper-button#one').addEventListener('click', doOneYear);
+document.querySelector('paper-button#one-step').addEventListener('click', doOneStep);
 document.querySelector('paper-button#reset').addEventListener('click', doReset);
 
 var stats = new Stats();
@@ -20,13 +22,15 @@ if (Util.getQueryParameter('debug')) {
   document.body.appendChild(stats.domElement);
 }
 
-var renderer = new Renderer({stackCount: 10, isLandscape: false});
+var renderer = new Renderer({stackCount: 10, isLandscape: true, isStack: true});
 
 function init() {
-  Util.loadScript(Util.getQueryParameter('model'), function() {
+  var model = Util.getQueryParameter('model') || DEFAULT_MODEL;
+  Util.loadScript(model, function() {
     createGui();
     updateGuiStep();
     document.querySelector('#title').innerHTML = window.title;
+    labelRend = new LabelRenderer(simulation, renderer);
   });
 }
 
@@ -61,6 +65,9 @@ function onKey(e) {
 
 function onResize() {
   renderer.resize();
+  if (window.labelRend) {
+    labelRend.updateLabels();
+  }
 }
 
 var lastTotals = [];
@@ -90,13 +97,11 @@ function updateVisualization() {
 
     // If at least one block was added, show the animation.
     if (blockCount >= 1 && sign == 1) {
-      //repeatFunction(function() { renderer.add(i); }, blockCount)
       renderer.add(i, blockCount);
     }
 
     // If at least one block was removed, show the animation.
     if (blockCount >= 1 && sign == -1) {
-      //repeatFunction(function() { renderer.remove(i); }, blockCount);
       renderer.remove(i, blockCount);
     }
 
@@ -113,13 +118,19 @@ function updateVisualization() {
     remainders[i] = remainder * sign;
   }
 
-  renderer.updateCamera();
+  updateView();
 }
 
-function repeatFunction(func, count) {
-  for (var i = 0; i < count; i++) {
-    func();
+function updateView() {
+  if (window.updateTimer) {
+    clearTimeout(updateTimer);
   }
+  updateTimer = setTimeout(function() {
+    renderer.updateCamera(function() {
+      labelRend.updateLabels();
+      labelRend.setVisibility(true);
+    });
+  }, 500);
 }
 
 SPECIAL_PROPERTIES = 'total';
@@ -180,16 +191,22 @@ function updateGuiStep() {
   document.querySelector('#iteration').innerHTML = simulation.currentStep;
 }
 
-function doFiveSteps() {
+function do25Years() {
   for (var i = 0; i < 25; i++) {
-    doOneStepHelper();
+    doOneYearHelper();
   }
   updateVisualization();
   updateGuiStep();
 }
 
+function doOneYear() {
+  doOneYearHelper();
+  updateVisualization();
+  updateGuiStep();
+}
+
 function doOneStep() {
-  doOneStepHelper();
+  simulation.step();
   updateVisualization();
   updateGuiStep();
 }
@@ -198,7 +215,7 @@ function doReset() {
   window.location.reload();
 }
 
-function doOneStepHelper() {
+function doOneYearHelper() {
   // Keep stepping until we get to the next one.
   var startStep = simulation.currentStep;
   while (startStep == simulation.currentStep) {

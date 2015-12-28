@@ -18,8 +18,10 @@
     <link rel="import" href="bower_components/paper-styles/demo-pages.html">
     <link rel="import" href="bower_components/paper-styles/typography.html">
     <link rel="import" href="bower_components/paper-button/paper-button.html">
+    <link rel="import" href="bower_components/paper-dialog/paper-dialog.html">
 
     <link rel="import" href="components/ineq-item.html">
+    <link rel="import" href="components/actor-label.html">
 	</head>
 	<body unresolved>
     <style is="custom-style">
@@ -46,9 +48,13 @@
 
 .controls {
   position: absolute;
-  bottom: 0;
-  right: 0;
-  color: white;
+  bottom: 4px;
+  right: 4px;
+}
+
+.controls paper-button {
+  color: blue;
+  background:  white;
 }
 
 .list {
@@ -91,9 +97,13 @@ body, html {
         <div id="title" class="paper-font-headline">Simulation title</div>
 
         <div class="controls">
-          <paper-button raised id="five">25 Steps</paper-button>
-          <paper-button raised id="one">One Step</paper-button>
+          <paper-button raised id="five">25 Year</paper-button>
+          <paper-button raised id="one">One Year</paper-button>
+          <paper-button raised id="one-step">One Step</paper-button>
           <paper-button raised id="reset">Reset</paper-button>
+        </div>
+
+        <div class="labels">
         </div>
       </div>
       <div drawer>
@@ -123,6 +133,7 @@ body, html {
 
     <script src="util.js"></script>
     <script src="renderer.js"></script>
+    <script src="label-renderer.js"></script>
     <script src="rule.js"></script>
     <script src="actor.js"></script>
     <script src="simulation.js"></script>

@@ -6,7 +6,7 @@ var rules = [
     condition: ['Math.random() < 0.01', 'this.isEntrepreneur == true']},
   {label: 'Enterprise fail', action: 'this.total -= 0.05 * this.total',
     condition: ['Math.random() < 0.1', 'this.isEntrepreneur == true']},
-  {label: 'Spending', action: 'this.total -= 1 * this.spendingHabits'},
+  {label: 'Spending', action: 'this.total -= 1'},
 ];
 
 var simulation = new Simulation(rules);
@@ -14,12 +14,10 @@ var simulation = new Simulation(rules);
 simulation.addActor({
   label: 'entrepreneur',
   incomeMultiplier: 1,
-  spendingHabits: 1,
   isEntrepreneur: true
 });
 simulation.addActor({
   label: 'not-entrepreneur',
   incomeMultiplier: 1,
-  spendingHabits: 1,
   isEntrepreneur: false
 });

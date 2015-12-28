@@ -1,0 +1,84 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+
+<dom-module id="actor-label">
+  <style>
+:host {
+  position: absolute;
+  padding: 4px;
+  visibility: hidden;
+  background: #CDCBCD;
+  border: 1px solid #A3A1A3;
+}
+
+#title {
+  max-width: 110px;
+  word-wrap: normal;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+
+li {
+  list-style: none;
+  margin-left: 12px;
+}
+
+li.label, li.total, li.age {
+  display: none;
+}
+  </style>
+
+  <template>
+    <div id="title" on-click="handleClick">{{ actor.label }}</div>
+
+    <paper-dialog id="dialog" with-backdrop>
+      <h2>{{actor.label}}</h2>
+      <ul>
+        <template is="dom-repeat" items="{{_toArray(actor)}}">
+          <li class$="{{item.name}}">{{item.name}}:
+            <strong>{{item.value}}</strong></li>
+        </template>
+      </ul>
+    </paper-dialog>
+  </template>
+
+  <script>
+    Polymer({
+      is: "actor-label",
+      properties: {
+        actor: Object,
+        expanded: Boolean,
+        position: Object,
+        visibility: Boolean,
+      },
+      observers: [
+        'positionChanged(position)',
+        'visibilityChanged(visibility)',
+      ],
+      
+      positionChanged: function(position) {
+        this.style.top = (this.offsetHeight + position.y) + 'px';
+        this.style.left = (position.x - this.offsetWidth/2) + 'px';
+        this.style.visibility = 'visible';
+      },
+
+      visibilityChanged: function(visibility) {
+        this.style.visibility = visibility ? 'visible' : 'hidden';
+      },
+
+      _toArray: function(obj) {
+        return Object.keys(obj).map(function(key) {
+          return {
+            name: key,
+            value: obj[key]
+          };
+        });
+      },
+
+      handleClick: function() {
+        this.expanded = !this.expanded;
+        this.$.dialog.open();
+      }
+    });
+  </script>
+
+</dom-module>
