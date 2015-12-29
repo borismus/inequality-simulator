@@ -7,10 +7,12 @@
   padding: 4px;
   visibility: hidden;
   background: #CDCBCD;
-  border: 1px solid #A3A1A3;
+  /*border: 1px solid #A3A1A3;*/
+  box-shadow: 0 0 10px #CDCBCD;
 }
 
 #title {
+  color: #A3A1A3;
   max-width: 110px;
   word-wrap: normal;
   cursor: pointer;
@@ -28,7 +30,7 @@ li.label, li.total, li.age {
   </style>
 
   <template>
-    <div id="title" on-click="handleClick">{{ actor.label }}</div>
+    <div id="title" on-click="handleClick">"{{ actor.label }}"</div>
 
     <paper-dialog id="dialog" with-backdrop>
       <h2>{{actor.label}}</h2>

@@ -7,7 +7,7 @@ var rules = [
     condition: ['Math.random() < 0.01', 'this.isEntrepreneur == true']},
   {label: 'Enterprise fail', action: 'this.total -= 0.05 * this.total',
     condition: ['Math.random() < 0.1', 'this.isEntrepreneur == true']},
-  {label: 'Spending', action: 'this.total -= 1 * this.spendingHabits'},
+  {label: 'Spending', action: 'this.total -= 1'},
   {label: 'Estate tax', action: 'this.total -= 0.4 * this.total',
       condition: ['this.age % 10 == 0', 'this.total > 50']},
   {label: 'Wealth tax', action: 'this.total -= 0.01 * this.total',
@@ -38,7 +38,6 @@ for (var i = 0; i < incomes.length; i++) {
         incomeMultiplier: incomes[i],
         investmentAbility: investmentAbilities[j],
         isEntrepreneur: entrepreneurness[k],
-        spendingHabits: 1,
         age: 0
       });
     }
