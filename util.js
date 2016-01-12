@@ -1,33 +1,57 @@
-var Util = {};
+Util = window.Util || {};
 
 /**
- * Normal distribution implementation. Polar form of the Box-Muller
- * transformation.
+ * Given a simulation, calculates the gini coefficient for the world.
  */
-Util.getRandomNormal = function(mean, sd) {
-  return mean + (this.gaussRandom_() * sd);
+Util.calculateGini = function(simulation) {
+  var actors = simulation.actors;
+  var numer = 0;
+  var denom = 0;
+  for (var i = 0; i < actors.length; i++) {
+    for (var j = 0; j < actors.length; j++) {
+      numer += Math.abs(actors[i].total - actors[j].total);
+      denom += actors[i].total;
+    }
+  }
+  return 0.5 * numer / denom;
+}
+
+Util.uniquifyArray = function(a) {
+  var seen = {};
+  return a.filter(function(item) {
+    return seen.hasOwnProperty(item) ? false : (seen[item] = true);
+  });
+}
+
+Util.removeArrayItem = function(a, item) {
+  var index = a.indexOf(item);
+  if (index == -1) {
+    console.warn('Attempt to remove non-existen item \'%s\' from array', item);
+    return;
+  }
+  a.splice(index, 1);
+}
+
+Util.appendArrays = function(a1, a2) {
+  var out = a1.slice();
+  for (var i = 0; i < a2.length; i++) {
+    out.push(a2[i]);
+  }
+  return Util.uniquifyArray(out);
 };
 
-/*
- * Returns random number in normal distribution centering on 0.
- * ~95% of numbers returned should fall between -2 and 2
- *
- * From http://stackoverflow.com/questions/75677/converting-a-uniform-distribution-to-a-normal-distribution?rq=1
- */
-Util.gaussRandom_ = function() {
-    var u = 2*Math.random()-1;
-    var v = 2*Math.random()-1;
-    var r = u*u + v*v;
-    /*if outside interval [0,1] start over*/
-    if(r == 0 || r > 1) return this.gaussRandom_();
-
-    var c = Math.sqrt(-2*Math.log(r)/r);
-    return u*c;
-
-    /* todo: optimize this algorithm by caching (v*c) 
-     * and returning next time gaussRandom() is called.
-     * left out for simplicity */
+// From http://goo.gl/4WX3tg
+Util.getQueryParameter = function(name) {
+  name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+  var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+      results = regex.exec(location.search);
+  return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
 };
 
-
-module.exports = Util;
+Util.loadScript = function(src, callback) {
+  // Simply loads an additional JS file at the given src.
+  var script = document.createElement('script');
+  script.src = src;
+  document.body.appendChild(script);
+  script.addEventListener('load', callback);
+}
