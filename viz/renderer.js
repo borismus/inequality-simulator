@@ -185,7 +185,7 @@ Renderer.prototype.createScene_ = function() {
 Renderer.prototype.createItem_ = function() {
   // Create 3D objects.
   var geometry = new THREE.BoxGeometry(ITEM_WIDTH, ITEM_HEIGHT, ITEM_DEPTH);
-  var material = new THREE.MeshBasicMaterial({color: '#5D7A54'});
+  var material = new THREE.MeshBasicMaterial({color: '#3F6C2F'});
   //var material = new THREE.MeshNormalMaterial();
   var cube = new THREE.Mesh(geometry, material);
   return cube;
@@ -266,7 +266,7 @@ Renderer.prototype.getStackOffsetX_ = function(stackId) {
  * Sink should be at the bottom of all stacks, centered.
  */
 Renderer.prototype.getSinkPosition_ = function(stackId, opt_isAbsolute) {
-  var bbox = this.getBoundingBox_();
+  var bbox = this.getCachedBoundingBox_();
   var pos = bbox.center();
   pos.y = bbox.min.y;
   pos.y -= 5;
@@ -280,7 +280,7 @@ Renderer.prototype.getSinkPosition_ = function(stackId, opt_isAbsolute) {
  * Source should be on top of all of the stacks, centered.
  */
 Renderer.prototype.getSourcePosition_ = function(stackId, opt_isAbsolute) {
-  var bbox = this.getBoundingBox_();
+  var bbox = this.getCachedBoundingBox_();
   var pos = bbox.center();
   pos.y = bbox.max.y;
   pos.y += 2;
@@ -320,6 +320,17 @@ Renderer.prototype.moveObject_ = function(obj, end, duration, opt_callback) {
   tweens[id] = tween;
 };
 
+Renderer.prototype.getCachedBoundingBox_ = function() {
+  if (!this.cachedBoundingBox) {
+    this.cachedBoundingBox = this.getBoundingBox_();
+  }
+  return this.cachedBoundingBox;
+};
+
+Renderer.prototype.invalidateCachedBoundingBox = function() {
+  delete this.cachedBoundingBox;
+};
+
 Renderer.prototype.getBoundingBox_ = function(opt_root) {
   var stack = opt_root ? opt_root : this.scene;
   var bbox = new THREE.BoundingBoxHelper(stack, 0xffffff);
@@ -337,7 +348,7 @@ Renderer.prototype.updateCamera = function(opt_callback) {
 
   // TODO: Tween these movements, and only correct camera if new parameters have
   // changed a lot.
-  if (center.distanceTo(this.camera.position) > 3) {
+  if (center.distanceTo(this.camera.position) > 0) {
     var camera = this.camera;
     // Where the camera is now.
     var pos = new THREE.Vector3();
@@ -348,7 +359,7 @@ Renderer.prototype.updateCamera = function(opt_callback) {
     target.z = dist;
 
     var tween = new TWEEN.Tween(pos)
-        .to(target, 500)
+        .to(target, 200)
         .onUpdate(function() {
           camera.position.copy(this);
         })

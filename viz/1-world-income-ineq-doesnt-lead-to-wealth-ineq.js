@@ -1,4 +1,4 @@
-var title = 'Income inequality alone does not explain wealth inequality';
+var title = 'Income inequality leads to proportional wealth inequality';
 
 var rules = [
   {label: 'Salary', action: 'this.total += 2 * this.incomeMultiplier'},

@@ -73,6 +73,9 @@ function onResize() {
 var lastTotals = [];
 var remainders = [];
 function updateVisualization() {
+  renderer.invalidateCachedBoundingBox();
+
+  var change = 0;
   for (var i = 0; i < simulation.actors.length; i++) {
     // Make sure last total is initialized.
     if (!lastTotals[i]) {
@@ -116,21 +119,28 @@ function updateVisualization() {
 
     lastTotals[i] = total;
     remainders[i] = remainder * sign;
+
+    change += delta;
   }
 
-  updateView();
+  if (change > 0) {
+    // Only update the view if there was a net increase.
+    updateView();
+  }
 }
 
+var cameraTimer;
 function updateView() {
-  if (window.updateTimer) {
-    clearTimeout(updateTimer);
+  if (cameraTimer) {
+    clearTimeout(cameraTimer);
   }
-  updateTimer = setTimeout(function() {
+
+  cameraTimer = setTimeout(function() {
     renderer.updateCamera(function() {
-      labelRend.updateLabels();
       labelRend.setVisibility(true);
+      labelRend.updateLabels();
     });
-  }, 500);
+  }, 200);
 }
 
 SPECIAL_PROPERTIES = 'total';
@@ -149,6 +159,7 @@ function createGui() {
     ruleEl.setAttribute('color', 'green');
     ruleEl.setAttribute('title', rule.label);
     ruleEl.setAttribute('subtitle', rule.action.value);
+    ruleEl.rule = rule;
     allRulesEl.appendChild(ruleEl);
   });
 

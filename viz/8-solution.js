@@ -1,4 +1,4 @@
-var title = 'Solution 3: Wealth taxes can also reduce wealth inequality';
+var title = 'Capital gains, estate tax and wealth taxes';
 
 var rules = [
   {label: 'Salary', action: 'this.total += 2 * this.incomeMultiplier'},
@@ -8,6 +8,9 @@ var rules = [
   {label: 'Enterprise fail', action: 'this.total -= 0.05 * this.total',
     condition: ['Math.random() < 0.1', 'this.isEntrepreneur == true']},
   {label: 'Spending', action: 'this.total -= 1'},
+  {label: 'Capital gains tax', action: 'this.total -= this.investmentAbility * 0.4 * this.total'},
+  {label: 'Estate tax', action: 'this.total -= 0.4 * this.total',
+      condition: ['this.age % 10 == 0', 'this.total > 50']},
   {label: 'Wealth tax', action: 'this.total -= 0.01 * this.total',
       condition: 'this.total > 50'}
 ];
@@ -36,6 +39,7 @@ for (var i = 0; i < incomes.length; i++) {
         incomeMultiplier: incomes[i],
         investmentAbility: investmentAbilities[j],
         isEntrepreneur: entrepreneurness[k],
+        age: 0,
       });
     }
   }

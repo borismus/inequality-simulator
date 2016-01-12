@@ -1,10 +1,10 @@
-var title = 'Entrepreneurship combined with investment compounds wealth inequality';
+var title = 'Entrepreneurship, investment ability and salary differences';
 
 var rules = [
   {label: 'Salary', action: 'this.total += 2 * this.incomeMultiplier'},
   {label: 'Investment', action: 'this.total += this.investmentAbility * this.total'},
   {label: 'Enterprise success', action: 'this.total += 0.5 * this.total',
-    condition: ['Math.random() < 0.01', 'this.isEntrepreneur == true']},
+    condition: ['Math.random() < 0.02', 'this.isEntrepreneur == true']},
   {label: 'Enterprise fail', action: 'this.total -= 0.05 * this.total',
     condition: ['Math.random() < 0.1', 'this.isEntrepreneur == true']},
   {label: 'Spending', action: 'this.total -= 1'},

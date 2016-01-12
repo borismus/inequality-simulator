@@ -11,6 +11,22 @@
   background: #ccc;
 }
 
+.paper-font-subhead {
+  margin-top: 16px;
+  clear: both;
+  font-weight: 500;
+  font-size: 14px;
+  color: #888;
+}
+
+li pre {
+  margin: 0;
+}
+ul {
+  margin-top: 0;
+  margin-left: 20px;
+}
+
 .blue {
   background-color: var(--paper-light-blue-300);
 }
@@ -31,8 +47,8 @@
 
   </style>
 
-  <template>
-    <paper-icon-item selected$="{{selected}}" executed$="{{executed}}">
+  <template >
+    <paper-icon-item selected$="{{selected}}" executed$="{{executed}}" on-click="handleClick">
       <template is="dom-if" if="{{executed}}">
         <iron-icon class$="avatar {{color}}" icon="icons:check" item-icon></iron-icon>
       </template>
@@ -55,6 +71,22 @@
 
       <!--<iron-icon icon="delete"></iron-icon>-->
     </paper-icon-item>
+
+    <paper-dialog id="dialog" with-backdrop>
+      <h2>{{rule.label}}</h2>
+      <pre>{{rule.action.value}}</pre>
+
+      <template is="dom-if" if="{{rule.conditionals.length}}">
+        <div class="paper-font-subhead">Conditionals (&amp;&amp;)</div>
+        <ul>
+        <template is="dom-repeat" items="{{rule.conditionals}}">
+          <li><pre>{{item.value}}</pre></li>
+        </template>
+        </ul>
+      </template>
+
+    </paper-dialog>
+
   </template>
 
   <script>
@@ -63,7 +95,16 @@
       properties: {
         subtitle: String,
         noSubtitle: Boolean,
+        rule: Object,
         executed: {type: Boolean, value: false}
+      },
+
+      handleClick: function() {
+        if (this.noSubtitle) {
+          // If there's no subtitle, disallow clicking.
+          return;
+        }
+        this.$.dialog.open();
       }
     });
   </script>

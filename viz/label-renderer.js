@@ -20,8 +20,14 @@ function LabelRenderer(simulation, renderer) {
 }
 
 LabelRenderer.prototype.updateLabels = function() {
+  MOVE_THRESHOLD = 0;
   for (var i = 0; i < this.els.length; i++) {
-    this.els[i].position = renderer.get2DStackPosition(i);
+    var newPosition = renderer.get2DStackPosition(i);
+    var oldPosition = this.els[i].position;
+
+    if (!oldPosition || newPosition.distanceTo(oldPosition) > MOVE_THRESHOLD) {
+      this.els[i].position = newPosition;
+    }
   }
 };
 

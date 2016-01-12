@@ -58,9 +58,8 @@ li.label, li.total, li.age {
       ],
       
       positionChanged: function(position) {
-        this.style.top = (this.offsetHeight + position.y) + 'px';
+        this.style.top = (this.offsetHeight + position.y - 20) + 'px';
         this.style.left = (position.x - this.offsetWidth/2) + 'px';
-        this.style.visibility = 'visible';
       },
 
       visibilityChanged: function(visibility) {
