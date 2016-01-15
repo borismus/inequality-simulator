@@ -24,15 +24,14 @@ simulation.addActor({
 ```
 
 This code is lifted from [this simulation file][src]. The simulation file can be
-loaded by passing it in as a GET argument, as follows:
-
-    https://borismus.github.io/inequality-simulator/?model=1-world-income-ineq-doesnt-lead-to-wealth-ineq.js
+loaded by passing it in as a GET argument, using a URL like this one: <https://borismus.github.io/inequality-simulator/?model=1-world-income-ineq-doesnt-lead-to-wealth-ineq.js>.
 
 Which results in the following output:
 
-<video src="simulator.mp4" autoplay loop style="width: 100%"></video>
+[![Screenshot of simulation](images/screenshot.png)][demo]
 
 For more info, please read the blog post here:
 <http://smus.com/simulating-wealth-inequality>
 
 [src]: https://github.com/borismus/inequality-simulator/blob/master/1-world-income-ineq-doesnt-lead-to-wealth-ineq.js
+[demo]: https://borismus.github.io/inequality-simulator/?model=1-world-income-ineq-doesnt-lead-to-wealth-ineq.js
