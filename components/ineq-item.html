@@ -1,0 +1,112 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+
+<dom-module id="ineq-item">
+  <style>
+.avatar {
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #ccc;
+}
+
+.paper-font-subhead {
+  margin-top: 16px;
+  clear: both;
+  font-weight: 500;
+  font-size: 14px;
+  color: #888;
+}
+
+li pre {
+  margin: 0;
+}
+ul {
+  margin-top: 0;
+  margin-left: 20px;
+}
+
+.blue {
+  background-color: var(--paper-light-blue-300);
+}
+.red {
+  background-color: var(--paper-red-300);
+}
+.orange {
+  background-color: var(--paper-amber-300);
+}
+.green {
+  background-color: var(--paper-green-300);
+}
+
+[selected] {
+  box-shadow: 0 0 3px #333;
+  background: #fafafa;
+}
+
+  </style>
+
+  <template >
+    <paper-icon-item selected$="{{selected}}" executed$="{{executed}}" on-click="handleClick">
+      <template is="dom-if" if="{{executed}}">
+        <iron-icon class$="avatar {{color}}" icon="icons:check" item-icon></iron-icon>
+      </template>
+      <template is="dom-if" if="{{!executed}}">
+        <div class$="avatar {{color}}" item-icon></div>
+      </template>
+
+      <template is="dom-if" if="{{subtitle}}">
+        <paper-item-body two-line>
+          <div>{{title}}</div>
+          <div secondary>{{subtitle}}</div>
+        </paper-item-body>
+      </template>
+
+      <template class="flex" is="dom-if" if="{{noSubtitle}}">
+        <paper-item-body>
+          <div>{{title}}</div>
+        </paper-item-body>
+      </template>
+
+      <!--<iron-icon icon="delete"></iron-icon>-->
+    </paper-icon-item>
+
+    <paper-dialog id="dialog" with-backdrop>
+      <h2>{{rule.label}}</h2>
+      <pre>{{rule.action.value}}</pre>
+
+      <template is="dom-if" if="{{rule.conditionals.length}}">
+        <div class="paper-font-subhead">Conditionals (&amp;&amp;)</div>
+        <ul>
+        <template is="dom-repeat" items="{{rule.conditionals}}">
+          <li><pre>{{item.value}}</pre></li>
+        </template>
+        </ul>
+      </template>
+
+    </paper-dialog>
+
+  </template>
+
+  <script>
+    Polymer({
+      is: "ineq-item",
+      properties: {
+        subtitle: String,
+        noSubtitle: Boolean,
+        rule: Object,
+        executed: {type: Boolean, value: false}
+      },
+
+      handleClick: function() {
+        if (this.noSubtitle) {
+          // If there's no subtitle, disallow clicking.
+          return;
+        }
+        this.$.dialog.open();
+      }
+    });
+  </script>
+
+</dom-module>

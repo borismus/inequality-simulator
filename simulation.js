@@ -1,68 +1,119 @@
-var Household = require('./household.js');
-var Emitter = require('./emitter.js');
-var Util = require('./util.js');
-/**
- * A set of constants that define the world of the model, for example: tax
- * rates, market returns. Also defines the distributions that drive households.
- */
-function Simulation() {
-  // Who to consider wealthy.
-  this.wealthTaxThreshold = 1000;
-  // How much taxes to subject the wealthy to.
-  this.wealthTaxRate = 0.0001;
-  // Whether or not taxes paid by the wealthy get redistributed to the poor
-  // directly.
-  this.isSocialist = false;
+function Simulation(rules, opt_properties) {
+  // Array of Rules which get executed.
+  this.rules = [];
+  for (var i = 0; i < rules.length; i++) {
+    this.rules.push(new Rule(rules[i]));
+  }
 
-  // Parameters that drive household distributions.
-  this.discretionaryIncomeDist = {
-    mean: 50000,
-    sd: 10000
-  };
-  this.investmentAbilityDist = {
-    mean: 0.05,
-    sd: 0.03
-  };
+  // Properties.
+  var properties = opt_properties ? opt_properties : this.getProperties_(this.rules);
 
-  // Just to keep the numbers a bit down, otherwise everybody becomes a
-  // millionaire in like 100 iterations.
-  this.inflationRate = 0.03;
+  // String Array of property names which each actor must have.
+  this.properties = properties;
+  this.optionalProperties = ['total'];
 
-  this.households = [];
+  // Actors involved in the simulation.
+  this.actors = [];
+
+  this.previousStep = -1;
+  this.currentStep = 0;
+  this.currentRule = 0;
+
+  this.didPreviousRuleExecute = false;
 }
-Simulation.prototype = new Emitter();
 
-Simulation.prototype.tick = function(year) {
-  var worths = [];
-  this.households.forEach(function(h) {
-    h.tick(year);
-    worths.push(h.netWorth);
-  });
-  this.fire('tick', {netWorths: worths});
+Simulation.prototype.addActor = function(properties) {
+  // Ensure that all properties are valid.
+  if (!this.validateActorProperties_(properties)) {
+    return;
+  }
+  this.actors.push(new Actor(properties));
 };
 
-Simulation.prototype.getValue = function(valueName) {
-  var distName = valueName + 'Dist';
-  var dist = this[distName];
-  return Util.getRandomNormal(dist.mean, dist.sd);
+Simulation.prototype.step = function() {
+  this.previousRule = this.currentRule;
+  // Execute the current rule.
+  var rule = this.rules[this.currentRule];
+  this.executeRule_(rule);
+
+  // Go to the next rule.
+  this.goToNextRule_();
 };
 
-Simulation.prototype.payTax = function(donorHousehold, amount) {
-  // Split wealth evenly between all other households except itself.
-  var houses = this.households;
-  var amountPerHousehold = amount / (houses.length - 1);
+Simulation.prototype.executeRule_ = function(rule) {
+  this.didPreviousRuleExecute = false;
 
-  for (var i = 0; i < houses.length; i++) {
-    var h = houses[i];
-    if (h != donorHousehold) {
+  for (var i = 0; i < this.actors.length; i++) {
+    var actor = this.actors[i];
+    
+    // If there are conditionals, they must all be true to evaluate the rule.
+    var conds = rule.conditionals;
+    var shouldExecute = conds ? this.evalConds_(conds, actor) : true;
+
+    if (shouldExecute) {
+      rule.action.evaluate(actor);
+      this.didPreviousRuleExecute = true;
     }
-    h.netWorth += amountPerHousehold;
-
-    this.fire('welfare', {
-      household: h,
-      amount: amountPerHousehold
-    });
   }
 };
 
-module.exports = Simulation;
+Simulation.prototype.evalConds_ = function(conds, actor) {
+  for (var i = 0; i < conds.length; i++) {
+    var cond = conds[i];
+    if (!cond.evaluate(actor)) {
+      return false;
+    }
+  }
+  return true;
+};
+
+Simulation.prototype.goToNextRule_ = function() {
+  this.currentRule += 1;
+
+  // Loop back to the first rule if we just finished the last rule.
+  if (this.currentRule >= this.rules.length) {
+    this.currentRule = 0;
+    this.currentStep += 1;
+
+    this.updateActorAge_();
+  }
+};
+
+Simulation.prototype.updateActorAge_ = function() {
+  for (var i = 0; i < this.actors.length; i++) {
+    this.actors[i].age += 1;
+  };
+};
+
+Simulation.prototype.validateActorProperties_ = function(properties) {
+  // Check that all specified properties are valid (required or optional).
+  for (var p in properties) {
+    if (this.properties.indexOf(p) < 0 && this.optionalProperties.indexOf(p)) {
+      // This is an invalid property.
+      console.error('Found an invalid property: %s', p);
+      return false;
+    }
+  }
+  
+  // Check that all simulation properties are specified.
+  for (var i = 0; i < this.properties.length; i++) {
+    var p = this.properties[i];
+    if (properties[p] === undefined) {
+      // A property is not defined.
+      console.error('Required property not specified: %s', p);
+      return false;
+    }
+  }
+  return true;
+};
+
+Simulation.prototype.getProperties_ = function(rules) {
+  var properties = ['label'];
+  for (var i = 0; i < rules.length; i++) {
+    var rule = rules[i];
+    properties = Util.appendArrays(properties, rule.getProperties());
+  }
+  // Remove 'total', it's not required.
+  Util.removeArrayItem(properties, 'total');
+  return properties;
+};

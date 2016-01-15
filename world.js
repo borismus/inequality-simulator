@@ -1,0 +1,1 @@
+7-wealth-tax.js
