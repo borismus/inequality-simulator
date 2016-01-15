@@ -7,19 +7,21 @@ are executed in order, and each rule is applied to each household, affecting
 household wealth. Here is the definition of a simple simulation, in which two
 households have different incomes:
 
-    var rules = [
-      {label: 'Salary', action: 'this.total += 2 * this.incomeMultiplier'},
-      {label: 'Spending', action: 'this.total -= 1'},
-    ];
-    var simulation = new Simulation(rules);
-    simulation.addActor({
-      label: 'Low income',
-      incomeMultiplier: 1,
-    });
-    simulation.addActor({
-      label: 'High income',
-      incomeMultiplier: 2,
-    });
+```javascript
+var rules = [
+  {label: 'Salary', action: 'this.total += 2 * this.incomeMultiplier'},
+  {label: 'Spending', action: 'this.total -= 1'},
+];
+var simulation = new Simulation(rules);
+simulation.addActor({
+  label: 'Low income',
+  incomeMultiplier: 1,
+});
+simulation.addActor({
+  label: 'High income',
+  incomeMultiplier: 2,
+});
+```
 
 This code is lifted from [this simulation file][src]. The simulation file can be
 loaded by passing it in as a GET argument, as follows:
