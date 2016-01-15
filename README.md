@@ -28,7 +28,10 @@ loaded by passing it in as a GET argument, using a URL like this one: <https://b
 
 Which results in the following output:
 
-[![Screenshot of simulation](images/screenshot.png)][demo]
+<a href="https://borismus.github.io/inequality-simulator/?model=1-world-income-ineq-doesnt-lead-to-wealth-ineq.js">
+<video src="/borismus/inequality-simulator/raw/gh-pages/images/simulator.mp4" autoplay loop style="width: 100%"></video>
+</a>
+
 
 For more info, please read the blog post here:
 <http://smus.com/simulating-wealth-inequality>
